@@ -2,7 +2,8 @@
 import discord
 import requests
 import datetime as dt
-
+import os
+from dotenv import load_dotenv
 # start procedure
 client = discord.Client()
 
@@ -61,4 +62,7 @@ async def on_message(message):
         if not bot_sent_message:
             await message.channel.send("Hello. I am weather bot. Please enter the nearest city/town ")
 
-client.run("")
+load_dotenv()
+
+TOKEN = os.getenv("DISCORD_TOKEN")
+client.run(TOKEN)
