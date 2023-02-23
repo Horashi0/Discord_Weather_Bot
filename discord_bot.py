@@ -4,8 +4,12 @@ import requests
 import datetime as dt
 import os
 from dotenv import load_dotenv
+from discord.ext import commands
+from discord_slash import SlashCommand
+
 # start procedure
 client = discord.Client()
+
 
 @client.event
 async def on_ready():
@@ -13,6 +17,18 @@ async def on_ready():
         'I have hacked into ze mainframe, I am now online {0.user}'.format(client))
 
 bot_sent_message = False
+
+slash = SlashCommand(client, sync_commands=True)
+
+@slash.slash(name="weather", description="Get weather information for city",
+             options=[
+                {
+    "name":"city",
+    "description": "City name",
+    "type": 3,
+    "required": True
+                }
+             ])
 
 @client.event
 async def on_message(message):
@@ -46,15 +62,12 @@ async def on_message(message):
                 humidity = weather_data["main"]["humidity"]
                 time_id = dt.datetime.utcfromtimestamp(
                     weather_data["dt"] + weather_data["timezone"])
-                await message.channel.send(f"Temperature in {city}: {temp_celsius}°C")
-                await message.channel.send(f"Temperature in {city} feels like: {temp_celsius_feels_like}°C")
-                await message.channel.send(f"Humidity in {city}: {humidity}%")
-                await message.channel.send(f"Wind speed in {city}: {wind_speed}m/s")
-                await message.channel.send(f"Wind direction in {city}: {wind_degrees}°")
-                await message.channel.send(f"General Weather in {city}: {clouds}")
-                await message.channel.send(f"Sun rises in {city} at {sunrise_time} local time")
-                await message.channel.send(f"Sun sets in {city} at {sunset_time} local time")
-                await message.channel.send(f"The time in {city} is: {time_id}")
+                embed = discord.Embed(
+                    title=f"Weather in {city}",
+                    description=f"Temperature: {temp_celsius}°C\nFeels like: {temp_celsius_feels_like}°C\nHumidity: {humidity}%\nWind speed: {wind_speed}m/s\nWind direction: {wind_degrees}°\nGeneral weather: {clouds}\nSunrise time: {sunrise_time}\nSunset time: {sunset_time}\nFor more information: https://openweathermap.org/city/{identification}",
+                    color=discord.Color.blue())
+
+                await message.channel.send(embed=embed)
                 bot_sent_message = True
 
             else:
